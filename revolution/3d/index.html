@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>1789 · Le tunnel du temps</title>
+<meta name="description" content="La Révolution française en 3D : la caméra voyage dans un tunnel temporel, les écrans et les cartes flottent dans l'espace.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23101322'/><rect x='6' y='14' width='20' height='4' fill='%23E63946'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Archivo+Black&family=Geist:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --canvas: #0B0D18;
+    --ink: #F2EDE2;
+    --ink-soft: #ABA795;
+    --accent: #E63946;
+    --accent-bright: #F5606C;
+    --gold: #E8B84B;
+    --paper: #EFE6D2;
+    --paper-ink: #1B1626;
+    --display: "Archivo Black", "Archivo", system-ui, sans-serif;
+    --text: "Geist", system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scrollbar-color: #3A3F58 #0B0D18; }
+  body { background: var(--canvas); color: var(--ink); font-family: var(--text); overflow-x: hidden; }
+  ::selection { background: var(--accent); color: #fff; }
+
+  /* Le canvas 3D est fixe : c'est la fenêtre sur le monde. On ne scrolle
+     jamais LE canvas, on scrolle un grand espace vide (le spacer) et le
+     scroll pilote la caméra. */
+  #scene { position: fixed; inset: 0; z-index: 0; }
+  #spacer { height: 1400vh; }
+
+  /* ── Les cartes qui flottent par-dessus le monde 3D ── */
+  .float {
+    position: fixed; z-index: 10; opacity: 0; pointer-events: none;
+    will-change: transform, opacity;
+    max-width: min(30rem, 86vw);
+  }
+  .float.on { pointer-events: auto; }
+  .card {
+    background: var(--paper); color: var(--paper-ink);
+    border: 3px solid #12101E; border-radius: 6px;
+    box-shadow: 10px 10px 0 rgba(5, 6, 12, 0.6);
+    padding: 1.3rem 1.6rem;
+  }
+  .card--dark { background: rgba(18, 21, 38, 0.92); color: var(--ink); backdrop-filter: blur(4px); }
+  .card--dark p { color: #C9C4B4; }
+  .kicker {
+    font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem;
+  }
+  .card--dark .kicker { color: var(--accent-bright); }
+  .card h2 { font-family: var(--display); font-size: clamp(1.4rem, 3.2vw, 2.1rem); line-height: 1.05; margin-bottom: 0.55rem; text-wrap: balance; }
+  .card p { font-size: 0.98rem; line-height: 1.6; }
+
+  .float--lead  { left: clamp(1.25rem, 7vw, 7rem); top: 16vh; }
+  .float--trail { right: clamp(1.25rem, 7vw, 7rem); bottom: 16vh; }
+  .float--mid   { left: 50%; top: 50%; translate: -50% -50%; text-align: center; }
+
+  /* ── Le titre géant du début et la fin ── */
+  .hero-title h1 {
+    font-family: var(--display); color: var(--ink);
+    font-size: clamp(2.6rem, 9vw, 7rem); line-height: 0.98; text-wrap: balance;
+  }
+  .hero-title .gold { color: var(--gold); }
+  .hero-title p { margin-top: 1rem; color: var(--ink-soft); max-width: 30rem; font-size: 1.05rem; line-height: 1.6; }
+  .end-title {
+    background: rgba(11, 13, 24, 0.78); backdrop-filter: blur(3px);
+    border-radius: 10px; padding: clamp(1.5rem, 4vw, 2.8rem) clamp(1.5rem, 5vw, 3.5rem);
+  }
+  .end-title h2 { font-family: var(--display); font-size: clamp(2rem, 6vw, 4.5rem); line-height: 1; text-wrap: balance; }
+  .end-title .accent { color: var(--accent-bright); }
+  .end-title p { margin-top: 1rem; color: var(--ink-soft); max-width: 32rem; font-size: 1rem; line-height: 1.6; margin-inline: auto; }
+  .tricolore { display: inline-flex; height: 6px; width: 9rem; margin-top: 1.6rem; border-radius: 3px; overflow: hidden; }
+  .tricolore span { flex: 1; }
+  .tricolore span:nth-child(1) { background: #3557A7; }
+  .tricolore span:nth-child(2) { background: var(--paper); }
+  .tricolore span:nth-child(3) { background: var(--accent); }
+
+  /* ── L'éclair rouge de la lame ── */
+  #flash { position: fixed; inset: 0; z-index: 20; background: var(--accent); opacity: 0; pointer-events: none; }
+
+  .bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 30;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem clamp(1.25rem, 4vw, 3rem);
+    font-family: var(--display); letter-spacing: 0.1em; font-size: 0.95rem;
+  }
+  .bar a { color: var(--ink); text-decoration: none; }
+  .bar a:hover, .bar a:focus-visible { color: var(--accent-bright); }
+  .bar a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .bar .mark em { color: var(--accent); font-style: normal; }
+  .bar .alt { font-size: 0.7rem; letter-spacing: 0.14em; color: var(--ink-soft); }
+  .bar .alt:hover { color: var(--ink); }
+
+  #progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--accent); z-index: 40; width: 0; }
+
+  #nogl { display: none; position: fixed; inset: 0; z-index: 50; background: var(--canvas); place-items: center; text-align: center; padding: 2rem; }
+  #nogl a { color: var(--accent-bright); }
+</style>
+</head>
+<body>
+
+<div id="progress" aria-hidden="true"></div>
+<canvas id="scene" aria-hidden="true"></canvas>
+<div id="flash" aria-hidden="true"></div>
+
+<header class="bar">
+  <a class="mark" href="#top"><em>17</em>89 · 3D</a>
+  <a class="alt" href="../">Version classique</a>
+</header>
+
+<!-- Chaque .float est une carte qui apparaît à un moment précis du voyage.
+     data-at="début fin" en fraction du scroll total (0 à 1). -->
+<main id="top" aria-label="La Révolution française, voyage en 3D">
+
+  <div class="float float--lead hero-title" data-at="0 0.08">
+    <h1>Paris, <span class="gold">1789.</span><br>Entre dans le tunnel du temps.</h1>
+    <p>Fais défiler : la caméra avance à travers cinq années qui ont renversé la France. Les écrans flottent. Toi aussi.</p>
+  </div>
+
+  <div class="float float--trail" data-at="0.09 0.17">
+    <div class="card">
+      <p class="kicker">Versailles, la fête</p>
+      <h2>De l'or, des gâteaux, dix mille chandelles.</h2>
+      <p>Pendant que la cour danse dans la galerie des Glaces, la France est ruinée : Louis XVI a même financé la révolution américaine. La société est coupée en trois ordres, et le tiers état, 97 % du pays, paie les taxes des deux autres. Marie-Antoinette, surnommée « Madame Déficit », cristallise toutes les colères.</p>
+    </div>
+  </div>
+
+  <div class="float float--lead" data-at="0.20 0.27">
+    <div class="card">
+      <p class="kicker">L'hiver 1789 · La faim</p>
+      <h2>Pas de pain. Plus de patience.</h2>
+      <p>L'hiver est glacial, les récoltes ont manqué, et une miche coûte presque une journée de paie. Partout, on remplit des cahiers de doléances : des cahiers de plaintes où même les paysans écrivent ce qui ne va pas.</p>
+    </div>
+  </div>
+
+  <div class="float float--trail" data-at="0.29 0.36">
+    <div class="card card--dark">
+      <p class="kicker">Juin 1789 · Le Jeu de paume</p>
+      <h2>Une révolution qui commence sur un terrain de sport.</h2>
+      <p>Le tiers état se déclare Assemblée nationale et jure, dans une salle de jeu de paume, de donner une constitution à la France. Le 11 juillet, le roi renvoie Necker, le ministre adoré du peuple. Paris comprend le message.</p>
+    </div>
+  </div>
+
+  <div class="float float--lead" data-at="0.39 0.47">
+    <div class="card">
+      <p class="kicker">14 juillet 1789</p>
+      <h2>À l'assaut de la Bastille.</h2>
+      <p>Camille Desmoulins appelle Paris aux armes. La forteresse tombe, puis, dans la nuit du 4 août, mille ans de privilèges sont abolis. En octobre, ce sont les femmes de Paris qui marchent sur Versailles et ramènent le roi dans la capitale.</p>
+    </div>
+  </div>
+
+  <div class="float float--mid" data-at="0.50 0.57">
+    <div class="card card--dark">
+      <p class="kicker">Août 1789 · La Déclaration</p>
+      <h2>« Les hommes naissent libres et égaux en droits. »</h2>
+      <p>Dix-sept articles préparés avec l'aide de La Fayette et les conseils de Jefferson. Liberté d'opinion, égalité devant la loi, fin des arrestations arbitraires. Olympe de Gouges y ajoutera les droits de la femme en 1791, avant d'être guillotinée pour ses idées.</p>
+    </div>
+  </div>
+
+  <div class="float float--trail" data-at="0.60 0.66">
+    <div class="card">
+      <p class="kicker">1791-1792 · Tout bascule</p>
+      <h2>Varennes, Valmy, la République.</h2>
+      <p>Le roi fuit déguisé en valet et se fait reconnaître grâce à son portrait sur l'argent. L'Europe des rois attaque, Valmy tient bon, la Marseillaise devient l'hymne d'un peuple, et le 21 septembre 1792, la France est une République.</p>
+    </div>
+  </div>
+
+  <div class="float float--lead" data-at="0.68 0.77">
+    <div class="card card--dark">
+      <p class="kicker">1793 · La Terreur</p>
+      <h2>La machine s'emballe.</h2>
+      <p>Louis XVI, puis Marie-Antoinette, puis environ 17 000 condamnés, souvent après des procès de quelques minutes. Même Danton, la grande voix de la Révolution, y passe. Continue de défiler : la lame est entre tes mains.</p>
+    </div>
+  </div>
+
+  <div class="float float--mid" data-at="0.83 0.90">
+    <div class="card card--dark">
+      <p class="kicker">Juillet 1794</p>
+      <h2>La révolution a dévoré les siens.</h2>
+      <p>Robespierre, « l'Incorruptible », monte à son tour à l'échafaud. La Terreur meurt avec lui. Cinq ans plus tard, un jeune général nommé Bonaparte ramasse le pouvoir.</p>
+    </div>
+  </div>
+
+  <div class="float float--mid end-title" data-at="0.93 1">
+    <h2>Les rois sont revenus.<br>Les idées, elles, <span class="accent">sont restées.</span></h2>
+    <p>Liberté, Égalité, Fraternité. La Révolution t'a laissé le système métrique, les départements, le drapeau tricolore, le 14 juillet, et des droits que les chartes modernes reprennent encore. Toutes les démocraties voyagent à travers 1789.</p>
+    <div class="tricolore" aria-hidden="true"><span></span><span></span><span></span></div>
+  </div>
+
+</main>
+
+<div id="spacer" aria-hidden="true"></div>
+
+<div id="nogl"><p>Ton appareil ne supporte pas la 3D.<br><a href="../">Voir la version classique du site</a></p></div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module">
+import * as THREE from "three";
+
+/* ════════════════════════════════════════════════════════════════
+   LE TUNNEL DU TEMPS, expliqué simplement :
+
+   1. Une scène 3D avec du brouillard sombre.
+   2. Cinq écrans géants (des rectangles) suspendus le long d'un couloir,
+      chacun joue une de nos vidéos.
+   3. Des braises (particules) flottent partout.
+   4. Le scroll ne fait défiler AUCUNE page : il déplace la CAMÉRA.
+   5. Les textes sont des cartes HTML par-dessus, qui apparaissent
+      selon la position dans le tunnel.
+   ════════════════════════════════════════════════════════════════ */
+
+const canvas = document.getElementById("scene");
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+} catch (e) {
+  document.getElementById("nogl").style.display = "grid";
+  throw e;
+}
+/* 3D allégée : on plafonne la résolution pour que les vieux appareils suivent. */
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0b0d18);
+scene.fog = new THREE.Fog(0x0b0d18, 8, 55);          // le brouillard cache le fond du tunnel
+
+const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 120);
+
+/* ── Les cinq écrans vidéo ─────────────────────────────────────── */
+const SCREENS = [
+  { src: "../assets/01.mp4",      z: -18,  x: -3.5, tint: 0xE8B84B, label: "Versailles" },
+  { src: "../assets/02-loop.mp4", z: -58,  x:  3.5, tint: 0x8FA3C8, label: "Le pain" },
+  { src: "../assets/03.mp4",      z: -98,  x: -3.5, tint: 0xE63946, label: "La Bastille" },
+  { src: "../assets/05-loop.mp4", z: -138, x:  3.5, tint: 0xB9C0CE, label: "La Terreur" },
+  { src: "../assets/06-loop.mp4", z: -178, x:  0,   tint: 0xF0A868, label: "L'aube" },
+];
+
+const videos = [];
+for (const s of SCREENS) {
+  const video = document.createElement("video");
+  video.src = s.src;
+  video.muted = true; video.loop = true; video.playsInline = true;
+  video.setAttribute("playsinline", "");
+  videos.push(video);
+
+  const tex = new THREE.VideoTexture(video);
+  tex.colorSpace = THREE.SRGBColorSpace;
+
+  /* L'écran : un rectangle 16x9 qui joue la vidéo. */
+  const screen = new THREE.Mesh(
+    new THREE.PlaneGeometry(16, 9),
+    new THREE.MeshBasicMaterial({ map: tex })
+  );
+  screen.position.set(s.x, 0, s.z);
+  screen.rotation.y = s.x === 0 ? 0 : (s.x > 0 ? -0.22 : 0.22);  // légèrement tourné vers le couloir
+  scene.add(screen);
+
+  /* Le cadre rouge autour, comme une case de bande dessinée. */
+  const frame = new THREE.Mesh(
+    new THREE.PlaneGeometry(16.7, 9.7),
+    new THREE.MeshBasicMaterial({ color: 0x12101e })
+  );
+  frame.position.set(s.x, 0, s.z - 0.05);
+  frame.rotation.copy(screen.rotation);
+  scene.add(frame);
+
+  const glow = new THREE.Mesh(
+    new THREE.PlaneGeometry(17.4, 10.4),
+    new THREE.MeshBasicMaterial({ color: s.tint, transparent: true, opacity: 0.16 })
+  );
+  glow.position.set(s.x, 0, s.z - 0.1);
+  glow.rotation.copy(screen.rotation);
+  scene.add(glow);
+}
+
+/* Sur iPhone/iPad, une vidéo ne démarre qu'après un geste : on relance au premier toucher. */
+function playAll() { videos.forEach(v => v.play().catch(() => {})); }
+playAll();
+["touchstart", "click", "scroll"].forEach(ev => addEventListener(ev, playAll, { passive: true }));
+
+/* ── Les braises qui flottent (particules) ─────────────────────── */
+const COUNT = (navigator.deviceMemory || 4) >= 4 ? 700 : 300;   // 3D allégée : moins de braises sur petit appareil
+const pos = new Float32Array(COUNT * 3);
+for (let i = 0; i < COUNT; i++) {
+  pos[i * 3]     = (Math.random() - 0.5) * 34;      // x : la largeur du tunnel
+  pos[i * 3 + 1] = (Math.random() - 0.5) * 20;      // y : la hauteur
+  pos[i * 3 + 2] = -Math.random() * 200;            // z : toute la longueur du voyage
+}
+const pGeo = new THREE.BufferGeometry();
+pGeo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+const embers = new THREE.Points(pGeo, new THREE.PointsMaterial({
+  color: 0xE8B84B, size: 0.09, transparent: true, opacity: 0.75,
+  blending: THREE.AdditiveBlending, depthWrite: false,
+}));
+scene.add(embers);
+
+/* ── Le scroll pilote la caméra ────────────────────────────────── */
+const START_Z = 4, END_Z = -168;   // on s'arrête juste devant l'écran de l'aube (-178)
+let targetP = 0, smoothP = 0;          // targetP = où en est le scroll ; smoothP le suit en douceur
+let mx = 0, my = 0;                    // la souris fait légèrement flotter la caméra
+
+addEventListener("scroll", () => {
+  const doc = document.documentElement;
+  targetP = doc.scrollTop / (doc.scrollHeight - innerHeight);
+}, { passive: true });
+
+addEventListener("pointermove", e => {
+  mx = (e.clientX / innerWidth - 0.5);
+  my = (e.clientY / innerHeight - 0.5);
+}, { passive: true });
+
+/* ── Les cartes HTML qui flottent par-dessus ───────────────────── */
+const floats = [...document.querySelectorAll(".float")].map(el => {
+  const [a, b] = el.dataset.at.split(" ").map(Number);
+  return { el, a, b };
+});
+const flash = document.getElementById("flash");
+const progressBar = document.getElementById("progress");
+
+function resize() {
+  renderer.setSize(innerWidth, innerHeight);
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+resize();
+
+const clock = new THREE.Clock();
+
+function tick() {
+  const t = clock.getElapsedTime();
+
+  /* La caméra glisse vers la position du scroll (jamais d'à-coup). */
+  smoothP += (targetP - smoothP) * 0.06;
+  camera.position.z = START_Z + (END_Z - START_Z) * smoothP;
+  camera.position.x = Math.sin(smoothP * Math.PI * 4) * 1.2 + mx * 1.4;
+  camera.position.y = Math.sin(t * 0.4) * 0.25 - my * 1.0;
+  camera.lookAt(camera.position.x * 0.4, 0, camera.position.z - 10);
+
+  /* Les braises montent doucement et tournent un peu. */
+  embers.rotation.z = t * 0.02;
+  embers.position.y = Math.sin(t * 0.3) * 0.4;
+
+  /* L'éclair rouge de la lame, aux trois quarts du voyage. */
+  const f = smoothP > 0.78 && smoothP < 0.82 ? 1 - Math.abs(smoothP - 0.80) / 0.02 : 0;
+  flash.style.opacity = (f * 0.85).toFixed(3);
+
+  /* Chaque carte apparaît dans sa fenêtre, avec une petite dérive 3D. */
+  for (const c of floats) {
+    const local = (smoothP - c.a) / (c.b - c.a);
+    let o = 0;
+    if (local > 0 && local < 1) o = Math.min(local / 0.25, (1 - local) / 0.25, 1);
+    if (c.b >= 0.99 && local >= 1) o = 1;                       // la fin reste affichée
+    if (c.a === 0 && local <= 0) o = 1;                          // le titre est là dès l'arrivée
+    c.el.style.opacity = o.toFixed(3);
+    c.el.classList.toggle("on", o > 0.5);
+    const drift = (local - 0.5) * -46;                           // la carte glisse pendant qu'on passe
+    c.el.style.transform = `perspective(900px) translateY(${drift}px) rotateX(${(local - 0.5) * -7}deg)`;
+  }
+
+  progressBar.style.width = (smoothP * 100).toFixed(2) + "%";
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+tick();
+</script>
+</body>
+</html>

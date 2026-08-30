@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>1789 · L'année où la France a renversé la table</title>
+<meta name="description" content="La Révolution française en bande dessinée à faire défiler. La foule grandit avec toi. C'est toi qui fais tomber la lame.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23101322'/><rect x='6' y='14' width='20' height='4' fill='%23E63946'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Archivo+Black&family=Geist:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  :root {
+    --sc-canvas:     #101322;
+    --sc-surface:    #1A1E33;
+    --sc-ink:        #F2EDE2;
+    --sc-ink-soft:   #ABA795;
+    --sc-accent:     #E63946;
+    --sc-accent-ink: #17060A;
+    --sc-font-display: "Archivo Black", "Archivo", system-ui, sans-serif;
+    --sc-font-text:    "Geist", system-ui, sans-serif;
+    --gold: #E8B84B;
+    --paper: #EFE6D2;
+    --paper-ink: #1B1626;
+    --panel-border: #12101E;
+  }
+
+  /* ── comic panels: the "blocks" that ride over the world ── */
+  .panel {
+    background: var(--paper);
+    color: var(--paper-ink);
+    --sc-ink: var(--paper-ink);
+    --sc-ink-soft: #57503F;
+    border: 3px solid var(--panel-border);
+    border-radius: 6px;
+    box-shadow: 8px 8px 0 rgba(10, 8, 20, 0.55);
+    padding: clamp(1.1rem, 2.6vw, 2rem) clamp(1.25rem, 3vw, 2.4rem);
+    max-width: min(34rem, 88vw);
+  }
+  .panel--dark {
+    background: #171A2C;
+    color: var(--sc-ink);
+    --sc-ink: #F2EDE2;
+    --sc-ink-soft: #ABA795;
+    box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.5);
+  }
+  .panel .sc-body { color: inherit; }
+  .caption {
+    font-family: var(--sc-font-display);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--sc-accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .display-tight { line-height: 0.98; text-wrap: balance; letter-spacing: -0.015em; }
+  /* two-stop accent: same hue, lighter stop for display type on dark grounds */
+  .accent-word { color: #F5606C; }
+  .gold-word { color: var(--gold); }
+
+  /* ── world layers ── */
+  .world { position: absolute; inset: -12% 0; pointer-events: none; }
+  .world svg { width: 100%; height: 100%; display: block; }
+
+  /* ── act 1: versailles ── */
+  .hero-shade {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(58% 46% at 24% 52%, rgba(8, 9, 16, 0.82) 0%, rgba(8, 9, 16, 0.45) 55%, rgba(8, 9, 16, 0) 78%),
+      radial-gradient(130% 105% at 0% 100%, rgba(8, 9, 16, 0.96) 0%, rgba(8, 9, 16, 0.78) 46%, rgba(8, 9, 16, 0) 72%);
+  }
+  @media (max-width: 860px) {
+    .hero-shade { background: linear-gradient(rgba(8,9,16,0) 38%, rgba(8,9,16,0.9) 78%); }
+  }
+  .hero-copy { position: absolute; left: clamp(1.25rem, 6vw, 6rem); bottom: clamp(4.5rem, 14vh, 9rem); max-width: 40rem; }
+  .hero-copy h1 { font-size: clamp(2.6rem, 8.5vw, 6.5rem); }
+  .hero-copy .sc-body { max-width: 30rem; margin-top: 1rem; }
+
+  /* ── act 2: bread ── */
+  .bread { display: grid; gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; }
+  @media (min-width: 900px) { .bread { grid-template-columns: 0.85fr 1.35fr; } }
+  .bread figure { margin: 0; border: 3px solid var(--panel-border); border-radius: 6px; overflow: hidden; box-shadow: 8px 8px 0 rgba(10,8,20,.55); }
+  .bread figure video { display: block; width: 100%; height: clamp(20rem, 62vh, 34rem); object-fit: cover; }
+  .bread figure svg { display: block; width: 100%; height: auto; }
+  .bread figcaption { font-size: 0.8rem; color: var(--sc-ink-soft); padding: 0.5rem 0.8rem; background: #12141F; }
+
+  /* ── act 3: bastille ── */
+  .bastille-smoke {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(rgba(6, 5, 10, 0) 12%, rgba(6, 5, 10, 0.68) 32%, rgba(6, 5, 10, 0.68) 68%, rgba(6, 5, 10, 0) 88%);
+  }
+  .bastille-copy { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; padding: 0 var(--sc-gutter, 1.5rem); }
+  .bastille-copy h2 { font-size: clamp(3rem, 11vw, 8.5rem); color: var(--sc-ink); }
+  .bastille-line { position: absolute; left: 50%; transform: translateX(-50%); bottom: clamp(5rem, 16vh, 10rem); width: min(30rem, 86vw); }
+
+  /* ── act 4: rights rail ── */
+  .rail { display: flex; align-items: center; gap: clamp(1.25rem, 3vw, 2.5rem); padding: 0 clamp(1.5rem, 6vw, 6rem); height: 100%; }
+  .rail__lead { flex: 0 0 auto; width: min(26rem, 78vw); }
+  .rail__lead h2 { font-size: clamp(2.2rem, 5vw, 4rem); }
+  .right-card { flex: 0 0 auto; width: min(21rem, 72vw); perspective: 1100px; }
+  .card3d {
+    display: grid; width: 100%; text-align: left;
+    background: none; border: 0; padding: 0; cursor: pointer;
+    transform-style: preserve-3d;
+    transition: transform 0.65s var(--sc-ease-out);
+    font: inherit;
+  }
+  .card3d.flipped { transform: rotateY(180deg); }
+  .card-face {
+    grid-area: 1 / 1; backface-visibility: hidden; -webkit-backface-visibility: hidden;
+    background: var(--paper); color: var(--paper-ink);
+    border: 3px solid var(--panel-border); border-radius: 6px;
+    box-shadow: 8px 8px 0 rgba(10,8,20,.55);
+    padding: 1.4rem 1.5rem 2.2rem;
+  }
+  .card-face--back {
+    transform: rotateY(180deg);
+    background: #171A2C; color: var(--sc-ink);
+  }
+  .card-face--back p { color: #C9C4B4; }
+  .card-face .article {
+    font-family: var(--sc-font-display); font-size: 2.6rem; line-height: 1;
+    color: var(--sc-accent); margin-bottom: 0.6rem;
+  }
+  .card-face--back .article { color: #F5606C; font-size: 1rem; letter-spacing: 0.12em; text-transform: uppercase; }
+  .card-face .card-title { display: block; font-family: var(--sc-font-display); font-size: 1.15rem; line-height: 1.2; margin-bottom: 0.5rem; }
+  .card-face p { font-size: 0.95rem; line-height: 1.55; color: #3A3428; }
+  .flip-hint {
+    position: absolute; right: 0.9rem; bottom: 0.6rem;
+    font-family: var(--sc-font-display); font-size: 0.62rem;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-accent);
+  }
+  .card-face { position: relative; }
+  @media (prefers-reduced-motion: reduce) { .card3d { transition-duration: 0.15s; } }
+  .rail__coda { flex: 0 0 auto; width: min(24rem, 76vw); color: var(--sc-ink-soft); }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .rail > * { opacity: calc(0.55 + var(--sc-p, 1) * 0.45); }
+    .rail > :first-child { opacity: 1; }
+  }
+
+  /* ── act 5: guillotine ── */
+  .peak-stage { display: grid; place-items: end center; }
+  .peak-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .peak-corner {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(75% 62% at 0% 0%, rgba(7, 8, 15, 0.92) 0%, rgba(7, 8, 15, 0.5) 52%, rgba(7, 8, 15, 0) 76%);
+  }
+  .blade-veil {
+    position: absolute; inset: 0; background: #07080F;
+    transform: translateY(calc(var(--blade, 0) * 100% - 100%));
+    border-bottom: 5px solid #B9C0CE;
+    box-shadow: 0 6px 30px rgba(0, 0, 0, 0.8);
+  }
+  .flash { position: absolute; inset: 0; background: var(--sc-accent); opacity: var(--flash, 0); pointer-events: none; }
+  .peak-copy { position: absolute; left: clamp(1.25rem, 6vw, 6rem); top: clamp(5.5rem, 12vh, 8rem); max-width: 28rem; }
+  .peak-after .sc-body { max-width: 32rem; margin: 1rem auto 0; color: var(--sc-ink-soft); }
+  .peak-after { position: absolute; inset: 0; display: grid; place-items: start center; text-align: center; padding: clamp(5.5rem, 14vh, 9rem) var(--sc-gutter, 1.5rem) 0; }
+  .peak-after h2 { font-size: clamp(2.4rem, 7vw, 5.5rem); color: var(--sc-ink); padding: 0.4em 0.55em; max-width: 22ch; }
+
+  /* ── act 6: dawn close ── */
+  .dawn {
+    position: relative;
+    background: linear-gradient(#101322 0%, #232A4A 45%, #4A3B55 78%, #8A5A56 100%);
+    padding: calc(var(--sc-section, 6rem) * 0.7) 0 8.5rem;
+    overflow: hidden;
+  }
+  .dawn-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .dawn-veil {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(rgba(14, 16, 30, 0.88) 0%, rgba(14, 16, 30, 0.66) 62%, rgba(14, 16, 30, 0.2) 100%);
+  }
+  .dawn .sc-wrap { position: relative; z-index: 2; text-align: center; max-width: 46rem; }
+  .dawn h2 { font-size: clamp(2.6rem, 7vw, 5.5rem); color: var(--sc-ink); }
+  .dawn .sc-body { margin: 1.2rem auto 0; max-width: 34rem; }
+  .tricolore { display: inline-flex; height: 6px; width: 9rem; margin-top: 2rem; border-radius: 3px; overflow: hidden; }
+  .tricolore span { flex: 1; }
+  .tricolore span:nth-child(1) { background: #3557A7; }
+  .tricolore span:nth-child(2) { background: var(--paper); }
+  .tricolore span:nth-child(3) { background: var(--sc-accent); }
+  .foot { margin-top: 3.5rem; font-size: 0.85rem; color: rgba(242, 237, 226, 0.75); }
+
+  /* ── signature move: the crowd rail ── */
+  .crowd {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 74px;
+    display: flex; align-items: flex-end; justify-content: center;
+    pointer-events: none; z-index: 40; overflow: hidden;
+  }
+  .crowd svg { height: 64px; width: auto; flex: 0 0 auto; margin: 0 -6px; opacity: 0; transform: translateY(14px); transition: opacity 0.35s var(--sc-ease-out, ease-out), transform 0.35s var(--sc-ease-out, ease-out); }
+  .crowd svg.here { opacity: 1; transform: translateY(0); }
+  .crowd .arm { transform: rotate(105deg); transform-origin: 34px 26px; transition: transform 0.4s var(--sc-ease-out, ease-out); }
+  .crowd.rise .arm { transform: rotate(0deg); }
+  @media (prefers-reduced-motion: reduce) {
+    .crowd svg { transition: opacity 0.3s ease; transform: none; }
+  }
+
+  .site-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.9rem clamp(1.25rem, 4vw, 3rem);
+    font-family: var(--sc-font-display); letter-spacing: 0.1em;
+  }
+  .site-bar .mark { color: var(--sc-ink); font-size: 1rem; text-decoration: none; }
+  .site-bar .mark em { color: var(--sc-accent); font-style: normal; }
+</style>
+</head>
+<body>
+
+<span data-sc-progress></span>
+<div class="sc-grain" aria-hidden="true"></div>
+
+<header class="site-bar"><a class="mark" href="#top"><em>17</em>89</a></header>
+
+<div class="crowd" id="crowd" aria-hidden="true"></div>
+
+<main id="top">
+
+  <!-- 1 · VERSAILLES: scrub (Gemini clip), greet headline -->
+  <section data-sc-act="scrub" data-sc-span="2.5" data-sc-dwell="0.32" data-sc-drift="#191A2E">
+    <div data-sc-stage>
+      <img class="sc-stage__poster" src="assets/01-poster.jpg" alt="">
+      <video data-sc-scrub data-sc-src="assets/01.mp4"
+             data-sc-src-mobile="assets/01-m.mp4" muted playsinline></video>
+      <div class="sc-scrim sc-scrim--lead" aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="sc-copy sc-copy--lead hero-copy" data-sc-cue="0 0.82 0">
+        <h1 class="display-tight" data-sc-kinetic="lines">Paris, <span class="gold-word">1789.</span> La fête achève.</h1>
+        <p class="sc-body">À Versailles : de l'or, des gâteaux, dix mille chandelles. Dehors : tous ceux qui ont payé pour ça. Fais défiler, et regarde la foule grandir derrière toi.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · BREAD: flow + reveal -->
+  <section class="sc-section" data-sc-drift="#12141F" style="padding-block-start: calc(var(--sc-section) * 0.5);">
+    <div class="sc-wrap bread">
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <div class="panel">
+          <p class="caption">Pendant ce temps, dans les rues</p>
+          <h2 class="sc-display sc-display--md display-tight">Pas de pain. Pas d'argent. Plus de patience.</h2>
+          <p class="sc-body">L'hiver 1788-1789 est glacial, les récoltes ont manqué, et le pain devient si cher qu'une seule miche peut avaler presque toute la paie d'une journée. Pendant ce temps, la France est ruinée : le roi Louis XVI a englouti des fortunes, entre autres pour aider... la révolution américaine. Ironique, non ?</p>
+          <p class="sc-body">Sa solution : encore des taxes pour ceux qui ont le moins. La société est coupée en trois « ordres » : le clergé, la noblesse, et le tiers état. Les deux premiers ne paient presque rien. Le troisième, 97 % de la population, paie tout.</p>
+        </div>
+        <div class="panel panel--dark">
+          <p class="caption">Juin 1789 · Le serment du Jeu de paume</p>
+          <p class="sc-body">Le roi convoque les états généraux pour trouver de l'argent. Le tiers état en profite pour se déclarer « Assemblée nationale ». Chassés de leur salle, les députés se réfugient dans une salle de jeu de paume, l'ancêtre du tennis, et jurent de ne jamais se séparer avant d'avoir donné une constitution à la France. Une révolution qui commence sur un terrain de sport.</p>
+        </div>
+      </div>
+      <figure data-sc-reveal="up" data-sc-reveal-at="0.12 0.55">
+        <video autoplay loop muted playsinline poster="assets/02-poster.jpg"
+               aria-label="Silhouettes qui font la file devant une boulangerie sombre, la nuit">
+          <source src="assets/02-loop.mp4" type="video/mp4">
+        </video>
+        <figcaption>La file pour le pain, 4 h du matin. Encore.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 3 · BASTILLE: scrub (Gemini clip), the turn -->
+  <section data-sc-act="scrub" data-sc-span="2.8" data-sc-dwell="0.3" data-sc-drift="#1E1017">
+    <div data-sc-stage>
+      <img class="sc-stage__poster" src="assets/03-poster.jpg" alt="">
+      <video data-sc-scrub data-sc-src="assets/03.mp4"
+             data-sc-src-mobile="assets/03-m.mp4" muted playsinline></video>
+      <div class="sc-scrim sc-scrim--band" aria-hidden="true"></div>
+      <div class="bastille-smoke" aria-hidden="true"></div>
+      <div class="bastille-copy" data-sc-cue="0.12 0.46 0.18">
+        <h2 class="display-tight" data-sc-kinetic="words">14 JUILLET. <span class="accent-word">À L'ASSAUT.</span></h2>
+      </div>
+      <div class="bastille-line panel panel--dark" data-sc-cue="0.55 0.96">
+        <p class="caption">La Bastille tombe</p>
+        <p class="sc-body">Le 12 juillet, un jeune journaliste, Camille Desmoulins, monte sur une table et appelle Paris aux armes. Deux jours plus tard, la foule prend la forteresse-prison du roi, symbole de son pouvoir absolu. Elle ne contenait que sept prisonniers. Tout le monde s'en fichait : c'était pour montrer au roi à qui Paris appartenait vraiment. Trois semaines après, dans la nuit du 4 août, les nobles paniqués abolissent leurs propres privilèges. Mille ans de règles effacées en une nuit.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3b · L'AUTOMNE OÙ TOUT BASCULE: flow -->
+  <section class="sc-section" data-sc-drift="#141B2E" style="padding-block-start: calc(var(--sc-section) * 0.5);">
+    <div class="sc-wrap bread">
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <div class="panel">
+          <p class="caption">Octobre 1789 · La marche des femmes</p>
+          <h2 class="sc-display sc-display--md display-tight">Ce sont les femmes qui vont chercher le roi.</h2>
+          <p class="sc-body">Le pain manque encore. Alors des milliers de femmes de Paris marchent sous la pluie jusqu'à Versailles, armées de piques et de casseroles, envahissent le château et ramènent la famille royale à Paris. Le roi vivra désormais sous les yeux de son peuple. La reine Marie-Antoinette, qu'on accusait de dire « qu'ils mangent de la brioche » (elle ne l'a probablement jamais dit), devient la personne la plus détestée de France.</p>
+        </div>
+      </div>
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <div class="panel panel--dark">
+          <p class="caption">Juin 1791 · La fuite à Varennes</p>
+          <p class="sc-body">Le roi tente de s'enfuir de nuit, déguisé en valet, carrosse chargé et famille à bord. Manque de chance : à Varennes, on le reconnaît... notamment grâce à son portrait imprimé sur l'argent. Ramené à Paris sous escorte, il a perdu la confiance du peuple pour toujours. Un an plus tard, la monarchie tombe : le 21 septembre 1792, la France devient une République.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · RIGHTS: pan rail of declaration panels -->
+  <section data-sc-act="pan" data-sc-span="3.4" data-sc-drift="#15203A">
+    <div data-sc-stage>
+      <div class="rail" data-sc-pan="0.06">
+        <div class="rail__lead sc-stack">
+          <p class="caption">Août 1789</p>
+          <h2 class="display-tight">Ils ont écrit les nouvelles règles.</h2>
+          <p class="sc-body">La Déclaration des droits de l'homme et du citoyen. Dix-sept articles. Voici ceux qui ont tout changé.</p>
+        </div>
+        <article class="right-card" data-sc-tilt="6"><button class="card3d" type="button" aria-expanded="false">
+          <span class="card-face"><span class="article">I.</span><span class="card-title">Libres et égaux, dès la naissance.</span><p>Personne n'est au-dessus de toi en naissant. Ni un duc, ni un roi. En 1789, cette phrase, c'était de la dynamite.</p><span class="flip-hint">Retourne-moi</span></span>
+          <span class="card-face card-face--back"><span class="article">Le savais-tu ?</span><p>Le texte a été préparé par La Fayette, héros des deux mondes, avec les conseils de son ami Thomas Jefferson, l'ambassadeur américain à Paris.</p></span>
+        </button></article>
+        <article class="right-card" data-sc-tilt="6"><button class="card3d" type="button" aria-expanded="false">
+          <span class="card-face"><span class="article">VI.</span><span class="card-title">La loi appartient à tous.</span><p>Les lois viennent du peuple, et la même loi s'applique au boulanger comme au baron.</p><span class="flip-hint">Retourne-moi</span></span>
+          <span class="card-face card-face--back"><span class="article">Le savais-tu ?</span><p>« La loi est l'expression de la volonté générale. » Avant, la volonté du roi ÉTAIT la loi. On prête à Louis XIV la phrase : « L'État, c'est moi. »</p></span>
+        </button></article>
+        <article class="right-card" data-sc-tilt="6"><button class="card3d" type="button" aria-expanded="false">
+          <span class="card-face"><span class="article">VII.</span><span class="card-title">Pas d'arrestation sans raison.</span><p>Avant, le roi pouvait t'emprisonner avec une simple lettre signée, sans procès. Ces lettres ont pris le bord.</p><span class="flip-hint">Retourne-moi</span></span>
+          <span class="card-face card-face--back"><span class="article">Le savais-tu ?</span><p>Ces notes s'appelaient des « lettres de cachet ». L'écrivain Voltaire en a reçu : direction la Bastille, sans avocat ni jugement.</p></span>
+        </button></article>
+        <article class="right-card" data-sc-tilt="6"><button class="card3d" type="button" aria-expanded="false">
+          <span class="card-face"><span class="article">X.</span><span class="card-title">Crois ce que tu veux.</span><p>Personne ne peut être inquiété pour ses opinions, « même religieuses ». En 1789, ces deux mots-là ont fait trembler des cathédrales.</p><span class="flip-hint">Retourne-moi</span></span>
+          <span class="card-face card-face--back"><span class="article">Le savais-tu ?</span><p>Dans la foulée, la France accorde des droits égaux aux protestants, puis aux juifs. Une première en Europe.</p></span>
+        </button></article>
+        <article class="right-card" data-sc-tilt="6"><button class="card3d" type="button" aria-expanded="false">
+          <span class="card-face"><span class="article">XI.</span><span class="card-title">Dis-le. Imprime-le.</span><p>Liberté de parole et liberté de presse. Des idées venaient de faire tomber une forteresse, et tout le monde le savait.</p><span class="flip-hint">Retourne-moi</span></span>
+          <span class="card-face card-face--back"><span class="article">Le savais-tu ?</span><p>Résultat immédiat : des centaines de journaux naissent à Paris en quelques mois. Tout le monde imprime, tout le monde débat.</p></span>
+        </button></article>
+        <article class="right-card" data-sc-tilt="6"><button class="card3d" type="button" aria-expanded="false">
+          <span class="card-face"><span class="article">1791</span><span class="card-title">Et les femmes ?</span><p>Oubliées de la Déclaration. Olympe de Gouges réplique avec sa propre Déclaration des droits de la femme : « La femme naît libre et demeure égale à l'homme en droits. »</p><span class="flip-hint">Retourne-moi</span></span>
+          <span class="card-face card-face--back"><span class="article">Le savais-tu ?</span><p>Trop en avance sur son époque : la Révolution la guillotinera en 1793. L'histoire, elle, lui a donné raison.</p></span>
+        </button></article>
+        <div class="rail__coda sc-stack">
+          <p class="sc-body">Ça te dit quelque chose ? Les chartes des droits modernes, partout dans le monde, reprennent encore ces lignes. C'est la partie devoir d'école. C'est aussi la partie qui a duré.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · THE PEAK: the terror, scroll drives the blade -->
+  <section id="peak" data-sc-act="pin" data-sc-span="3.2" data-sc-drift="#0C0D16">
+    <div data-sc-stage class="peak-stage">
+      <video class="peak-bg" autoplay loop muted playsinline poster="assets/05-poster.jpg" aria-hidden="true">
+        <source src="assets/05-loop.mp4" type="video/mp4">
+      </video>
+      <div class="peak-corner" aria-hidden="true"></div>
+      <div class="blade-veil" aria-hidden="true"></div>
+      <div class="flash" aria-hidden="true"></div>
+      <div class="peak-copy panel panel--dark" data-sc-cue="0.04 0.4 0.15">
+        <p class="caption">1793. La partie sombre.</p>
+        <p class="sc-body">La République est en guerre contre la moitié de l'Europe et a peur des traîtres. Le 21 janvier 1793, Louis XVI est guillotiné devant une foule immense. Marie-Antoinette le suit en octobre. Puis la machine s'emballe : sous Robespierre, c'est la Terreur. Environ 17 000 personnes sont condamnées à mort, souvent après des procès de quelques minutes. La machine se voulait « humaine », rapide. Elle est surtout horriblement occupée.</p>
+        <p class="sc-body">Continue de défiler. La lame est entre tes mains maintenant.</p>
+      </div>
+      <div class="peak-after" data-sc-cue="0.78">
+        <h2 class="display-tight" data-sc-kinetic="lines">La révolution s'est mise à dévorer <span class="accent-word">les siens.</span></h2>
+        <p class="sc-body" data-sc-cue="0.84">Juillet 1794 : Robespierre monte à son tour à l'échafaud. La Terreur meurt avec celui qui l'avait nourrie.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · DAWN: quiet close, last element -->
+  <section class="dawn" data-sc-drift="#101322">
+    <video class="dawn-bg" autoplay loop muted playsinline poster="assets/06-poster.jpg" aria-hidden="true">
+      <source src="assets/06-loop.mp4" type="video/mp4">
+    </video>
+    <div class="dawn-veil" aria-hidden="true"></div>
+    <div class="sc-wrap sc-stack" data-sc-in data-sc-stagger="80">
+      <p class="caption">Après la tempête</p>
+      <h2 class="display-tight">Les rois sont revenus. Les idées, elles, sont restées.</h2>
+      <p class="sc-body">En 1799, un jeune général nommé Napoléon Bonaparte ramasse le pouvoir, et plus tard, d'autres rois reviendront même s'asseoir sur le trône. Mais impossible de remonter le temps : les privilèges sont morts, la loi est la même pour tous, et « libres et égaux en droits » ne peut plus se dédire. Liberté, Égalité, Fraternité est aujourd'hui la devise de la France, et toutes les démocraties modernes défilent encore à travers 1789.</p>
+      <div class="tricolore" aria-hidden="true"><span></span><span></span><span></span></div>
+      <footer class="foot">Un projet d'histoire, codé à la main. Demande-moi comment la foule fonctionne.</footer>
+    </div>
+  </section>
+
+</main>
+
+<script src="scrollcraft.js"></script>
+<script>
+ScrollCraft.mount(document.body);
+
+/* ── 3D cards: click to flip ── */
+document.querySelectorAll(".card3d").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const on = btn.classList.toggle("flipped");
+    btn.setAttribute("aria-expanded", on ? "true" : "false");
+  });
+});
+
+/* ── signature move: the crowd grows with your scroll ── */
+(function () {
+  const crowd = document.getElementById("crowd");
+  const N = 34;
+  for (let i = 0; i < N; i++) {
+    const h = 44 + ((i * 7919) % 20);
+    const sway = ((i * 31) % 7) - 3;
+    crowd.insertAdjacentHTML("beforeend",
+      '<svg viewBox="0 0 68 96" style="height:' + h + 'px; transform-origin: bottom;">' +
+      '<g transform="rotate(' + sway + ' 34 96)" fill="#05060C">' +
+      '<circle cx="34" cy="18" r="11"/>' +
+      '<path d="M18 96V50q0-18 16-18t16 18v46z"/>' +
+      '<g class="arm"><rect x="31" y="-22" width="6" height="52" rx="3"/><path d="M28 -26h12l-6 -12z" fill="#E63946"/></g>' +
+      "</g></svg>");
+  }
+  const figs = Array.from(crowd.children);
+  const peak = document.getElementById("peak");
+  let lastShown = -1;
+  function tick() {
+    const doc = document.documentElement;
+    const frac = Math.min(1, doc.scrollTop / Math.max(1, doc.scrollHeight - innerHeight));
+    const shown = Math.round(frac * N);
+    if (shown !== lastShown) {
+      figs.forEach((f, i) => f.classList.toggle("here", i < shown));
+      lastShown = shown;
+    }
+    const p = parseFloat(getComputedStyle(peak).getPropertyValue("--sc-p")) || 0;
+    /* blade: slow creep up to the release point, then a hard drop */
+    let blade = 0, flash = 0;
+    if (p > 0.42) {
+      if (p < 0.68) blade = ((p - 0.42) / 0.26) * 0.22;      /* creep */
+      else blade = 1;                                          /* drop */
+      if (p >= 0.68 && p < 0.76) flash = 1 - (p - 0.68) / 0.08;
+    }
+    peak.style.setProperty("--blade", blade.toFixed(3));
+    peak.style.setProperty("--flash", (flash * 0.85).toFixed(3));
+    crowd.classList.toggle("rise", p > 0.1 && p < 0.99 || frac > 0.96);
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+</script>
+
+<!--
+  GEMINI CLIP SLOTS
+  When your Gemini clips are ready (see GEMINI-PROMPTS.md), you can upgrade act 1
+  and act 3 from illustrated SVG to scroll-scrubbed video: replace the .world
+  block inside the act with:
+
+    <img class="sc-stage__poster" src="assets/01-poster.jpg" alt="">
+    <video data-sc-scrub data-sc-src="assets/01.mp4"
+           data-sc-src-mobile="assets/01-m.mp4" muted playsinline></video>
+
+  and re-encode each clip for scrubbing first:
+    bash <skill>/scripts/encode.sh raw.mp4 assets/01.mp4
+    bash <skill>/scripts/encode.sh raw.mp4 assets/01-m.mp4 mobile
+-->
+</body>
+</html>
